@@ -11,13 +11,18 @@ from the command line
 
 ### Basic (Single show)
     dtt futurama
+
 This outputs
+
     HD[x] 720[x] Futurama             S06E26 11 days ago
 
 ### Basic (Multiple shows)
 A comma separated list of shows without any spaces
+
     dtt futurama,cops,sons-of-anarchy,weeds
+
 This outputs
+
     HD[x] 720[x] Futurama             S06E26 11 days ago
     HD[x] 720[x] Cops                 S24E02 43 hrs ago
     HD[x] 720[x] Sons of Anarchy      S04E02 6 days ago
