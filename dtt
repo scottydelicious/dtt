@@ -1,0 +1,203 @@
+#!/usr/bin/env ruby
+
+# Copyright 2011 Scotty Delicious <scottydelicious@gmail.com>
+#
+# This file is part of DTT (Daily TV Torrents Ruby Interface).
+#
+# DTT is free software: you can redistribute it and/or modify it 
+# under the terms of the GNU General Public License as published 
+# by the Free Software Foundation, either version 3 of the License, 
+# or (at your option) any later version.
+#
+# DTT is distributed in the hope that it will be useful, but WITHOUT 
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public 
+# License for more details.
+#
+# You should have received a copy of the GNU General Public License 
+# along with DTT. If not, see http://www.gnu.org/licenses/.
+
+
+require 'rubygems'
+require 'net/http'
+require 'json'
+require 'optparse'
+
+VERSION = "0.0.1a"
+INFO = "Daily TV Torrents Ruby Interface v. "+VERSION
+API = "For more info and detailed usage, see http://api.dailytvtorrents.org/"
+
+module DTT
+
+	BASE_URL = "http://api.dailytvtorrents.org/1.0/"
+
+	def DTT.fetch(url)
+		response = Net::HTTP.get_response(URI.parse(url))
+		body = response.body
+		data = JSON.parse(body)
+		return data
+	end
+
+	class Episode
+		
+		def self.get_latest(show_name, params={})
+			url = BASE_URL + "episode.getLatest?show_name=#{show_name}"
+			data = DTT.fetch(url)
+		end
+
+	end
+
+	class Show
+		
+		def self.get_episodes(show_name, params={})
+			url = BASE_URL + "show.getEpisodes?show_name=#{show_name}&page=#{page}"
+			data = DTT.fetch(url)
+		end
+
+		def self.get_info(show_name, params={})
+			url = BASE_URL + "show.getInfo?show_name=#{show_name}"
+			data = DTT.fetch(url)	
+		end
+
+		def self.get_text_info(show_names, params={})
+			url = BASE_URL + "shows.getTextInfo?show_names=#{show_names}"
+			if params[:max_age_hours] then url = url + "&max_age_hours=#{params[:max_age_hours]}" end
+			if params[:colors] then url = url + "&colors=#{params[:colors]}" end
+			if params[:links] then url = url + "&links=#{params[:links]}" end
+			response = Net::HTTP.get_response(URI.parse(url))
+			body = response.body
+		end
+
+	end
+
+	class Torrent
+
+		def self.get_latest(show_name, params={})
+			url = BASE_URL + "torrent.getLatest?show_name=#{show_name}&quality=#{quality}"
+			data = DTT.fetch(url)
+		end
+
+		def self.get_info(show_name, params={})
+			url = BASE_URL + "torrent.getInfo?show_name=#{show_name}&episode_num=#{episode_num}"
+			if params[:quality] then url = url + "&quality=#{params[:quality]}" end
+			if params[:fallback] then url = url + "&fallback=#{params[:fallback]}" end
+			data = DTT.fetch(url)
+		end
+
+		def self.get_infos
+			
+		end
+
+		def self.get_infos_all
+			
+		end
+
+		def self.get_latest(show_name, params={})
+			url = BASE_URL + "torrent.getLatest?show_name=#{show_name}"
+			if params[:quality] then url = url + "&quality=#{params[:quality]}"	end
+			if params[:fallback] then url = url + "&fallback=#{params[:fallback]}" end
+			if params[:just_link] then url = url + "&just_link=#{params[:just_link]}" end
+			data = DTT.fetch(url)
+		end
+
+	end
+
+end
+
+options = {}
+OptionParser.new do |opts|
+	opts.banner = INFO + "\nUsage: dtt [options] show-name"
+	
+	opts.separator ""
+	opts.separator "Main functionality groups:"
+
+	opts.on("-T", "--torrent", "Utilize Torrent functions") do |t|
+	  options[:class] = "Torrent"
+  end
+
+	opts.on("-E", "--episode", "Utilize Episode functions") do |episode|
+		options[:class] = "Episode"
+	end
+
+	opts.on("-S", "--show", "Utilize Show functions") do |show|
+		options[:class] = "Show"
+	end
+
+	opts.on("-i", "--info", "Get info on a Episode, Show, or Torrent") do |i|
+		options[:method] = "get_info"
+	end
+
+	opts.on("-L", "--latest", "Get the latest torrent or episode info") do |i|
+		options[:method] = "get_latest"
+	end
+
+	opts.on("-t", "--text", "Get TEXT info on a Episode, Show, or Torrent") do |i|
+		options[:method] = "get_text_info"
+	end
+
+	opts.separator ""
+	opts.separator "Optional passed values"
+	
+	opts.on("-q", "--quality=QUALITY", String, "hd, 720, or 1080") do |q|
+		options[:quality] = q
+	end
+
+	opts.on("-m", "--max-age-hours=HOURS", String, "limit age of results") do |m|
+		options[:max_age_hours] = m
+	end
+
+	opts.on("-c", "--colors", "Colorize text output") do |c|
+		options[:colors] = "yes"
+	end
+
+	opts.on("-l", "--links", "Show torrent links in text output") do |links|
+		options[:links] = "yes"
+	end
+
+	opts.on("-f", "--fallback", "Fallback to lower quality if needed") do |f|
+		options[:fallback] = "yes"
+	end
+
+	opts.on("-n", "--number n", String, "Episdode number") do |n|
+		options[:episode_num] = n
+	end
+
+	opts.separator ""
+	opts.separator "Help:"
+	# No argument, shows at tail.  This will print an options summary.
+  # Try it and see!
+  opts.on_tail("-h", "--help", "Show this message") do
+  	puts opts
+  	exit
+  end
+
+  # Another typical switch to print the version.
+  opts.on_tail("-v","--version", "Show version") do
+    print INFO
+    exit
+  end
+
+end.parse!
+
+if !options[:class]
+	options[:class] = "Show"
+end
+
+if !options[:method]
+	options[:method] = "get_text_info"
+end
+
+#p options
+#p ARGV
+#p ARGV[-1]
+
+#p "DTT::#{options[:class]}.#{options[:method]}('#{ARGV[-1]}', #{options})"
+data = eval "DTT::#{options[:class]}.#{options[:method]}('#{ARGV[-1]}', #{options})"
+
+if options[:method] == "get_text_info"
+	print data
+else
+	data.each do |k,v|
+		print "#{k}: #{v}\n"
+	end
+end
