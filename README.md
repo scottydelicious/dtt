@@ -10,7 +10,7 @@ from the command line
 ## Examples
 
 ### Basic (Single show)
-    user@machine: $ dtt futurama
+    user@machine:$ dtt futurama
 
 This outputs
 
@@ -19,7 +19,7 @@ This outputs
 ### Basic (Multiple shows)
 A comma separated list of shows without any spaces
 
-    user@machine: $ dtt futurama,cops,sons-of-anarchy,weeds
+    user@machine:$ dtt futurama,cops,sons-of-anarchy,weeds
 
 This outputs
 
