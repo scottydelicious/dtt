@@ -27,3 +27,7 @@ This outputs
     HD[x] 720[x] Cops                 S24E02 43 hrs ago
     HD[x] 720[x] Sons of Anarchy      S04E02 6 days ago
     HD[x] 720[x] Weeds                S07E11 7 days ago
+
+Add the --colors (or -c) flag for colored output shown below
+
+![Colored Output](/screenshots/with_colors.png "With Colors")
