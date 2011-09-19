@@ -30,4 +30,4 @@ This outputs
 
 Add the --colors (or -c) flag for colored output shown below
 
-![Colored Output](/scottydelicious/dtt/screenshots/with_colors.png "With Colors")
+![Colored Output](/scottydelicious/dtt/raw/master/screenshots/with_colors.png "With Colors")
