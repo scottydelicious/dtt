@@ -6,6 +6,11 @@ from the command line
 ## Requirements
  * Ruby (Tested with MRI 1.9.2-p290)
  * The JSON gem (gem install json)
+ * wget
+
+## Installation
+Place the dtt script in a directory that is in your executable path, e.g. ~/bin/ or
+/usr/local/bin/
 
 ## Examples
 
