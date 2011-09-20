@@ -79,11 +79,16 @@ module DTT
 
 		def self.get_text_info(show_names, params={})
 			url = BASE_URL + "shows.getTextInfo?show_names=#{show_names}"
-			if params[:max_age_hours] then url = url + "&max_age_hours=#{params[:max_age_hours]}" end
-			if params[:colors] then url = url + "&colors=#{params[:colors]}" end
-			if params[:links] then url = url + "&links=#{params[:links]}" end
+			url += "&colors=#{params[:colors]}" if params[:colors]
+			url += "&links=#{params[:links]}" if params[:links]
+			url += "&max_age_hours=#{params[:max_age_hours]}" if params[:max_age_hours]
 			response = Net::HTTP.get_response(URI.parse(url))
 			body = response.body
+		end
+		
+		def search(query, params={})
+			url = BASE_URL + "shows.search?query=#{query}"
+			url += "&page=#{params[:page]}" if params[:page]
 		end
 
 	end
@@ -92,8 +97,8 @@ module DTT
 
 		def self.get_info(show_name, params={})
 			url = BASE_URL + "torrent.getInfo?show_name=#{show_name}&episode_num=#{params[:episode_num]}"
-			if params[:quality] then url = url + "&quality=#{params[:quality]}" end
-			if params[:fallback] then url = url + "&fallback=#{params[:fallback]}" end
+			url += "&quality=#{params[:quality]}" if params[:quality]
+			url += "&fallback=#{params[:fallback]}" if params[:fallback]
 			data = DTT.fetch(url)
 		end
 
@@ -107,9 +112,9 @@ module DTT
 
 		def self.get_latest(show_name, params={})
 			url = BASE_URL + "torrent.getLatest?show_name=#{show_name}"
-			if params[:quality] then url = url + "&quality=#{params[:quality]}"	end
-			if params[:fallback] then url = url + "&fallback=#{params[:fallback]}" end
-			if params[:just_link] then url = url + "&just_link=#{params[:just_link]}" end
+			url += "&quality=#{params[:quality]}" if params[:quality]
+			url += "&fallback=#{params[:fallback]}" if params[:fallback]
+			url += "&just_link=#{params[:just_link]}" if params[:just_link]
 			data = DTT.fetch(url)
 		end
 
