@@ -34,8 +34,26 @@ module DTT
 	def DTT.fetch(url)
 		response = Net::HTTP.get_response(URI.parse(url))
 		body = response.body
-		data = JSON.parse(body)
+		begin
+			data = JSON.parse(body)
+		rescue JSON::ParserError 
+			data = {:error => "JSON Parser Error. Perhaps nothing matched your search?"} 
+		end
 		return data
+	end
+
+	def DTT.age(seconds)
+		mm, ss = seconds.divmod(60)
+		hh, mm = mm.divmod(60)
+		dd, hh = hh.divmod(24)
+		age = "%d days, %d hours, %d minutes and %d seconds" % [dd,hh,mm,ss]
+	end
+
+	def DTT.wget(link)
+    cmd = "wget \"#{link}\""
+    dl = IO.popen(cmd)
+    lines = dl.readlines
+    lines.join
 	end
 
 	class Episode
@@ -72,13 +90,8 @@ module DTT
 
 	class Torrent
 
-		def self.get_latest(show_name, params={})
-			url = BASE_URL + "torrent.getLatest?show_name=#{show_name}&quality=#{quality}"
-			data = DTT.fetch(url)
-		end
-
 		def self.get_info(show_name, params={})
-			url = BASE_URL + "torrent.getInfo?show_name=#{show_name}&episode_num=#{episode_num}"
+			url = BASE_URL + "torrent.getInfo?show_name=#{show_name}&episode_num=#{params[:episode_num]}"
 			if params[:quality] then url = url + "&quality=#{params[:quality]}" end
 			if params[:fallback] then url = url + "&fallback=#{params[:fallback]}" end
 			data = DTT.fetch(url)
@@ -113,10 +126,12 @@ OptionParser.new do |opts|
 
 	opts.on("-T", "--torrent", "Utilize Torrent functions") do |t|
 	  options[:class] = "Torrent"
+	  options[:method] = "get_latest" unless options[:method]
   end
 
 	opts.on("-E", "--episode", "Utilize Episode functions") do |episode|
 		options[:class] = "Episode"
+		options[:method] = "get_latest"
 	end
 
 	opts.on("-S", "--show", "Utilize Show functions") do |show|
@@ -193,11 +208,29 @@ end
 
 #p "DTT::#{options[:class]}.#{options[:method]}('#{ARGV[-1]}', #{options})"
 data = eval "DTT::#{options[:class]}.#{options[:method]}('#{ARGV[-1]}', #{options})"
-
+data["age"] = DTT.age(data["age"]) if data["age"]
 if options[:method] == "get_text_info"
 	print data
+	
+elsif options[:class] == "Episode"
+	puts "Latest Episode of #{ARGV[-1]} is #{data["num"]}"
+	puts "Uploaded #{data["age"]} ago"
+
+	print "Available in "
+	print data["hd"] == true ? "[HD] " : ""
+	print data["720"] == true ? "[720] " : ""
+	print data["1080"] == true ? "[1080] " : ""
+  
 else
 	data.each do |k,v|
 		print "#{k}: #{v}\n"
 	end
+end
+
+if options[:class] == "Torrent" && !data["link"].nil?
+  puts "\nDownload this torrent? [y/N]"
+  answer = $stdin.gets.strip.downcase
+  if answer == "y" || answer == "yes"
+    puts DTT.wget(data["link"])
+  end
 end
