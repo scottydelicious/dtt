@@ -13,6 +13,9 @@ Place the dtt script in a directory that is in your executable path, e.g. ~/bin/
 /usr/local/bin/
 
 ## Examples
+You can run dtt with the -h (or --help) flag to see a list of options. The
+help screen is a work in progress at this point. All the options are listed,
+but their descriptions may be unhelpful.
 
 ### Basic (Single show text info)
     user@machine:$ dtt futurama
